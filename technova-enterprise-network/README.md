@@ -94,10 +94,6 @@ More screenshots (VLANs/trunks, DHCP snooping, IPv6 dual-stack, troubleshooting)
 
 VLSM and IPv6 planning, NAT/PAT, VLANs and 802.1Q trunking, inter-VLAN routing, Layer 2 hardening, multi-area OSPF and authentication, DHCP, troubleshooting with `show` and `debug`, network documentation.
 
-## Team
-
-Dilnethu R G H, Rathnayaka R.M.C.D, Senarathne B.A.T, Kirushan R
-
 ## Academic note
 
 This repository documents coursework. If you are a student, use it for reference only and follow your own institution's academic integrity rules.
