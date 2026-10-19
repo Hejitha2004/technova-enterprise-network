@@ -1,0 +1,26 @@
+! MULTICAST VERIFICATION (Task C3)
+! Group 239.1.1.1 | RP = R-CORE Loopback0 172.16.10.241 | Source = Server-VLAN40 (172.16.10.162)
+! Packet Tracer has no real multicast-streaming app, so simulate receivers with IGMP joins on the routers.
+
+! -- Receiver 1: HR LAN (R-DIST1)
+conf t
+interface GigabitEthernet0/0.10
+ ip igmp join-group 239.1.1.1
+! -- Receiver 2: Branch LAN (R-BRANCH)
+conf t
+interface GigabitEthernet0/0
+ ip igmp join-group 239.1.1.1
+
+! -- Source: R-DIST2 sends test stream from the server VLAN
+R-DIST2# ping 239.1.1.1 source GigabitEthernet0/0.40 repeat 20
+!  (also try ping 239.1.1.1 from the Server-PT command prompt)
+
+! -- Evidence commands (screenshot each)
+show ip pim neighbor
+show ip pim rp mapping
+show ip igmp groups
+show ip mroute
+show ip mroute 239.1.1.1
+show ip route                 ! RP loopback 172.16.10.241 learned via OSPF; 224.0.0.0/4 entries on show ip mroute
+SW-F1# show ip igmp snooping
+SW-F1# show ip igmp snooping groups

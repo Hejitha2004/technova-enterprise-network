@@ -1,0 +1,101 @@
+hostname R-DIST1
+no ip domain-lookup
+service password-encryption
+enable secret <CHANGE_ME>
+banner motd #TechNova Solutions - Authorised access only#
+line con 0
+ password <CHANGE_ME>
+ login
+ logging synchronous
+line vty 0 4
+ password <CHANGE_ME>
+ login
+!
+ipv6 unicast-routing
+!
+ip dhcp excluded-address 172.16.10.1
+ip dhcp excluded-address 172.16.10.65
+ip dhcp excluded-address 172.16.10.93 172.16.10.94
+ip dhcp pool HR
+ network 172.16.10.64 255.255.255.224
+ default-router 172.16.10.65
+ dns-server 8.8.8.8
+ip dhcp pool ENG
+ network 172.16.10.0 255.255.255.192
+ default-router 172.16.10.1
+ dns-server 8.8.8.8
+!
+interface GigabitEthernet0/0
+ description TRUNK-TO-SW-CORE (router-on-a-stick)
+ no ip address
+ no shutdown
+!
+interface GigabitEthernet0/0.10
+ description VLAN10
+ encapsulation dot1Q 10
+ ip address 172.16.10.65 255.255.255.224
+ ipv6 address 2001:DB8:ACAD:10::1/64
+ no shutdown
+!
+interface GigabitEthernet0/0.20
+ description VLAN20
+ encapsulation dot1Q 20
+ ip address 172.16.10.1 255.255.255.192
+ ipv6 address 2001:DB8:ACAD:20::1/64
+ no shutdown
+!
+interface GigabitEthernet0/0.99
+ description VLAN99
+ encapsulation dot1Q 99
+ ip address 172.16.10.177 255.255.255.248
+ ipv6 address 2001:DB8:ACAD:99::1/64
+ no shutdown
+!
+interface GigabitEthernet0/0.999
+ description NATIVE
+ encapsulation dot1Q 999 native
+ no ip address
+!
+interface GigabitEthernet0/1
+ description TO-R-CORE
+ ip address 172.16.10.190 255.255.255.252
+ ipv6 address 2001:DB8:ACAD:F1::2/64
+ ip ospf authentication message-digest
+ ip ospf message-digest-key 1 md5 <OSPF_MD5_KEY>
+ no shutdown
+!
+interface Loopback0
+ ip address 172.16.10.242 255.255.255.255
+!
+! ---- OSPF ----
+router ospf 1
+ router-id 172.16.10.242
+ auto-cost reference-bandwidth 1000
+ passive-interface default
+ no passive-interface GigabitEthernet0/1
+ network 172.16.10.188 0.0.0.3 area 0
+ network 172.16.10.0 0.0.0.63 area 1
+ network 172.16.10.64 0.0.0.31 area 1
+ network 172.16.10.176 0.0.0.7 area 1
+ network 172.16.10.242 0.0.0.0 area 1
+!
+! ---- Multicast: PIM-SM / IGMP / static RP ----
+ip multicast-routing
+access-list 10 permit host 239.1.1.1
+ip pim rp-address 172.16.10.241 10
+interface Loopback0
+ ip pim sparse-mode
+!
+interface GigabitEthernet0/0.10
+ ip pim sparse-mode
+ ip igmp version 2
+!
+interface GigabitEthernet0/0.20
+ ip pim sparse-mode
+ ip igmp version 2
+!
+interface GigabitEthernet0/1
+ ip pim sparse-mode
+!
+end
+write memory

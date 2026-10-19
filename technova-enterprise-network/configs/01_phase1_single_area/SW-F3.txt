@@ -1,0 +1,84 @@
+hostname SW-F3
+no ip domain-lookup
+service password-encryption
+enable secret <CHANGE_ME>
+banner motd #TechNova Solutions - Authorised access only#
+line con 0
+ password <CHANGE_ME>
+ login
+ logging synchronous
+line vty 0 4
+ password <CHANGE_ME>
+ login
+!
+vlan 10
+ name HR
+vlan 20
+ name Engineering
+vlan 30
+ name Sales
+vlan 40
+ name Servers
+vlan 99
+ name Management
+vlan 999
+ name Native
+!
+spanning-tree mode rapid-pvst
+!
+interface GigabitEthernet0/1
+ description TRUNK
+ switchport mode trunk
+ switchport trunk native vlan 999
+ switchport trunk allowed vlan 30,99,999
+ switchport nonegotiate
+ no shutdown
+!
+interface range FastEthernet0/1-12
+ description ACCESS-VLAN30
+ switchport mode access
+ switchport access vlan 30
+ switchport nonegotiate
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security violation shutdown
+ switchport port-security mac-address sticky
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ ip dhcp snooping limit rate 15
+ no shutdown
+!
+interface FastEthernet0/13
+ description WIRELESS-AP
+ switchport mode access
+ switchport access vlan 30
+ switchport nonegotiate
+ switchport port-security
+ switchport port-security maximum 8
+ switchport port-security violation restrict
+ switchport port-security mac-address sticky
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+!
+interface range FastEthernet0/14-24
+ description UNUSED
+ switchport mode access
+ switchport access vlan 999
+ shutdown
+!
+interface vlan 99
+ description MANAGEMENT-SVI
+ ip address 172.16.10.181 255.255.255.248
+ no shutdown
+!
+ip default-gateway 172.16.10.177
+!
+ip dhcp snooping
+ip dhcp snooping vlan 10,20,30,40,99
+no ip dhcp snooping information option
+interface GigabitEthernet0/1
+ ip dhcp snooping trust
+!
+end
+write memory

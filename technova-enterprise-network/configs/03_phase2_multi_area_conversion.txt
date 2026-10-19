@@ -1,0 +1,46 @@
+! PHASE 2 CONVERSION: single-area (all area 0) -> multi-area. Paste per router in global config mode.
+
+! ===== R-CORE =====
+conf t
+router ospf 1
+ end
+write memory
+
+! ===== R-DIST1 =====
+conf t
+router ospf 1
+ no network 172.16.10.0 0.0.0.63 area 0
+ network 172.16.10.0 0.0.0.63 area 1
+ no network 172.16.10.64 0.0.0.31 area 0
+ network 172.16.10.64 0.0.0.31 area 1
+ no network 172.16.10.176 0.0.0.7 area 0
+ network 172.16.10.176 0.0.0.7 area 1
+ no network 172.16.10.242 0.0.0.0 area 0
+ network 172.16.10.242 0.0.0.0 area 1
+ end
+write memory
+
+! ===== R-DIST2 =====
+conf t
+router ospf 1
+ no network 172.16.10.96 0.0.0.31 area 0
+ network 172.16.10.96 0.0.0.31 area 2
+ no network 172.16.10.160 0.0.0.15 area 0
+ network 172.16.10.160 0.0.0.15 area 2
+ no network 172.16.10.243 0.0.0.0 area 0
+ network 172.16.10.243 0.0.0.0 area 2
+ end
+write memory
+
+! ===== R-BRANCH =====
+conf t
+router ospf 1
+ no network 172.16.10.128 0.0.0.31 area 0
+ network 172.16.10.128 0.0.0.31 area 3
+ no network 172.16.10.244 0.0.0.0 area 0
+ network 172.16.10.244 0.0.0.0 area 3
+ end
+write memory
+
+! Verify:  show ip ospf | include Area|Routing   (ABRs show 'area border router')
+!         show ip ospf database   |   show ip route ospf   (look for 'O IA' routes)

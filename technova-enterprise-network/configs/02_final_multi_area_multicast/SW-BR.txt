@@ -1,0 +1,63 @@
+hostname SW-BR
+no ip domain-lookup
+service password-encryption
+enable secret <CHANGE_ME>
+banner motd #TechNova Solutions - Authorised access only#
+line con 0
+ password <CHANGE_ME>
+ login
+ logging synchronous
+line vty 0 4
+ password <CHANGE_ME>
+ login
+!
+vlan 10
+ name HR
+vlan 20
+ name Engineering
+vlan 30
+ name Sales
+vlan 40
+ name Servers
+vlan 99
+ name Management
+vlan 999
+ name Native
+vlan 50
+ name Branch
+!
+spanning-tree mode rapid-pvst
+!
+interface range FastEthernet0/2-24
+ description ACCESS-VLAN50
+ switchport mode access
+ switchport access vlan 50
+ switchport nonegotiate
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security violation shutdown
+ switchport port-security mac-address sticky
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ ip dhcp snooping limit rate 15
+ no shutdown
+!
+interface vlan 50
+ description MANAGEMENT-SVI
+ ip address 172.16.10.130 255.255.255.224
+ no shutdown
+!
+ip default-gateway 172.16.10.129
+!
+ip dhcp snooping
+ip dhcp snooping vlan 50
+no ip dhcp snooping information option
+interface FastEthernet0/1
+ description TO-R-BRANCH
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ ip dhcp snooping trust
+!
+end
+write memory

@@ -1,0 +1,50 @@
+hostname R-BRANCH
+no ip domain-lookup
+service password-encryption
+enable secret <CHANGE_ME>
+banner motd #TechNova Solutions - Authorised access only#
+line con 0
+ password <CHANGE_ME>
+ login
+ logging synchronous
+line vty 0 4
+ password <CHANGE_ME>
+ login
+!
+ipv6 unicast-routing
+!
+ip dhcp excluded-address 172.16.10.129 172.16.10.134
+ip dhcp pool BRANCH
+ network 172.16.10.128 255.255.255.224
+ default-router 172.16.10.129
+ dns-server 8.8.8.8
+!
+interface Serial0/0/0
+ description WAN-TO-R-CORE
+ ip address 172.16.10.186 255.255.255.252
+ ipv6 address 2001:DB8:ACAD:F0::2/64
+ ip ospf authentication message-digest
+ ip ospf message-digest-key 1 md5 <OSPF_MD5_KEY>
+ no shutdown
+!
+interface GigabitEthernet0/0
+ description BRANCH-LAN
+ ip address 172.16.10.129 255.255.255.224
+ ipv6 address 2001:DB8:ACAD:50::1/64
+ no shutdown
+!
+interface Loopback0
+ ip address 172.16.10.244 255.255.255.255
+!
+! ---- OSPF ----
+router ospf 1
+ router-id 172.16.10.244
+ auto-cost reference-bandwidth 1000
+ passive-interface default
+ no passive-interface Serial0/0/0
+ network 172.16.10.184 0.0.0.3 area 0
+ network 172.16.10.128 0.0.0.31 area 0
+ network 172.16.10.244 0.0.0.0 area 0
+!
+end
+write memory

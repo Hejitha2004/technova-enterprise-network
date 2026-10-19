@@ -1,0 +1,28 @@
+! TASK C4 - FAULT: MD5 key mismatch on the WAN link (R-BRANCH)
+! ---------- 1. INJECT the fault (R-BRANCH) ----------
+conf t
+interface Serial0/0/0
+ ip ospf message-digest-key 1 md5 WRONGKEY
+ end
+! ---------- 2. SYMPTOMS ----------
+R-BRANCH# ping 172.16.10.1                         ! fails (100% loss)
+R-BRANCH# show ip route ospf                       ! no OSPF routes
+! ---------- 3. DIAGNOSE ----------
+show ip ospf neighbor                              ! neighbour missing on R-CORE & R-BRANCH
+show ip ospf interface Serial0/0/0                 ! shows 'Message digest authentication enabled, key id 1'
+show run | section ospf | interface Serial          ! compare md5 keys on both ends
+debug ip ospf adj                                  ! look for 'Mismatched Authentication Key'  (undebug all afterwards)
+! ---------- 4. FIX (R-BRANCH) ----------
+conf t
+interface Serial0/0/0
+ no ip ospf message-digest-key 1 md5 WRONGKEY
+ ip ospf message-digest-key 1 md5 <OSPF_MD5_KEY>
+ end
+! ---------- 5. VERIFY ----------
+show ip ospf neighbor                              ! FULL state
+show ip route ospf
+ping 172.16.10.1
+!
+! Other faults you can use instead: wrong area ID on one side (neighbours stay in INIT/EXSTART or never form),
+! wrong network wildcard (interface not in OSPF - check 'show ip ospf interface brief'),
+! mismatched hello/dead timers ('show ip ospf interface' -> Hello/Dead values).

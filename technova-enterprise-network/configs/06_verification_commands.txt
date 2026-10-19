@@ -1,0 +1,14 @@
+! ===== EVIDENCE / SCREENSHOT COMMANDS =====
+! A1/A2  IPv4/IPv6:    show ip interface brief | show ipv6 interface brief | show run interface <x>
+!        Dual-stack:   ping 2001:DB8:ACAD:F1::2   (from R-CORE)  and  ping 172.16.10.190
+!        PC IPv6:      set PC IPv6 config = Automatic (SLAAC) or static 2001:DB8:ACAD:10::A/64 gw 2001:DB8:ACAD:10::1
+! A3     NAT:          PC(HR)> ping 8.8.8.8      then   R-CORE# show ip nat translations | show ip nat statistics
+! B1     VLAN/trunk:   show vlan brief | show interfaces trunk | show run | include native
+! B2     Inter-VLAN:   PC(HR)> ping 172.16.10.2 (Eng PC) / Sales PC / Server 172.16.10.162 ; R-DIST1# show ip route
+! B3     Security:     show port-security | show port-security interface fa0/1 | show ip dhcp snooping | show ip dhcp snooping binding
+!        Violation:    plug a 3rd device (hub/switch + 3 PCs) or change a PC's MAC, then 'show interfaces status' -> err-disabled
+!        Recover:      interface fa0/x -> shutdown -> no shutdown
+!        BPDU guard:   connect a switch to an access port -> port goes err-disabled ; show spanning-tree summary
+! C1/C2  OSPF:         show ip ospf neighbor | show ip route ospf | show ip ospf database | show ip ospf | show ip protocols
+!        Reachability: PC(HR)> ping 172.16.10.130 (branch) ; PC(Branch)> ping 172.16.10.162 (server)
+! C3     Multicast:    see D_Multicast_Verification_Commands.txt
